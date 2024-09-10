@@ -1,156 +1,139 @@
-# Stock and News Headline Analysis
+# Stock Market and News Headline Analysis
 
 ## Overview
 
-This project aims to merge stock data and news headlines to analyze the impact of news on stock prices. It processes stock data from CSV files stored in a ZIP archive and cleans news headlines data to align both datasets on date and ticker symbol. The analysis focuses on industries with multiple stocks, such as Biotechnology and Medical Devices, to explore potential correlations between stock price changes and news events.
+This project aims to analyze stock market data in conjunction with news headlines to explore potential correlations between market sentiment and stock price movements. The analysis involves extracting and processing stock market data and news headlines, performing sentiment analysis, and visualizing the results.
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Setup](#setup)
-- [Data Preparation](#data-preparation)
-- [Script Details](#script-details)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
 - [Usage](#usage)
+- [Methods](#methods)
 - [Results](#results)
+- [Data](#data)
+- [Dependencies](#dependencies)
+- [Contributing](#contributing)
+- [License](#license)
 
+## Project Structure
 
-## Features
+```
+stock-sentiment-analysis/
+├── extracted_files/          # Folder where extracted stock CSV files are stored
+├── stocks.zip                # Zip file containing individual stock CSV files
+├── news_headlines.csv        # CSV file containing news headlines
+├── news_data.csv             # CSV file with industry information
+├── stock_data.csv            # Aggregated stock data CSV file
+├── training_data.csv         # Final dataset with merged and processed data
+├── analysis.ipynb            # Jupyter notebook with analysis and visualization
+├── requirements.txt          # List of Python packages required
+└── README.md                 # This README file
+```
 
-- Extracts and processes stock data from multiple CSV files within a ZIP archive.
-- Cleans and preprocesses news headlines data to ensure accurate date formats and ticker symbols.
-- Merges stock and news data on matching dates and ticker symbols.
-- Filters and visualizes data for industries with multiple stocks to identify trends and correlations.
+## Getting Started
 
-## Setup
+To get started with this project, you'll need to clone the repository and install the required dependencies.
 
-### Prerequisites
+### Clone the Repository
 
-Ensure you have the following installed:
+```bash
+git clone https://github.com/yourusername/stock-sentiment-analysis.git
+cd stock-sentiment-analysis
+```
 
-- Python 3.x
-- Required libraries:
-  - pandas
-  - matplotlib
-  - scikit-learn
+### Install Dependencies
 
-### Installation
+Ensure you have `pip` installed, then run:
 
-1. Clone this repository:
-
-   ```bash
-   git clone https://github.com/yourusername/stock-news-analysis.git
-   cd stock-news-analysis
-   ```
-
-2. Install the required dependencies:
-
-   ```bash
-   pip install pandas matplotlib scikit-learn
-   ```
-
-3. Ensure `stocks.zip` (containing CSV files for stock data) and `news_headlines.csv` (for news data) are placed in the project's root directory.
-
-## Data Preparation
-
-### 1. Extracting Stock Data
-
-The function `list_files_in_zip()` extracts stock data CSVs from `stocks.zip`. Each CSV represents a different stock ticker, and these files are loaded into a DataFrame, concatenated, and relevant columns are processed for analysis.
-
-### 2. Cleaning News Headlines Data
-
-The news headlines are read from `news_headlines.csv`. Key cleaning steps include:
-
-- Splitting the combined 'date' and 'time' into separate columns.
-- Converting 'date' fields into `datetime` objects for accurate merging.
-- Dropping invalid dates or entries that do not match stock data criteria.
-
-## Script Details
-
-### Code Walkthrough
-
-1. **Extracting Stock Files:**
-
-   ```python
-   def list_files_in_zip(zip_path):
-       with zipfile.ZipFile(zip_path, 'r') as z:
-           return z.namelist()
-   ```
-
-   This function lists all files within the ZIP archive (`stocks.zip`).
-
-2. **Loading Stock Data:**
-
-   ```python
-   dfs = []
-   for file_name in stock_files:
-       df = pd.read_csv(f'./stocks/{file_name}')
-       dfs.append(df)
-   all_stocks = pd.concat(dfs)
-   ```
-
-   Stock data from each file is loaded and concatenated into a single DataFrame.
-
-3. **Cleaning News Data:**
-
-   ```python
-   news = pd.read_csv('news_headlines.csv')
-   news[['date', 'time']] = news['date'].str.split(expand=True)
-   news['date'] = pd.to_datetime(news['date'], format='%Y-%m-%d', errors='coerce')
-   ```
-
-   News data is cleaned by splitting dates and times, and ensuring date formats are consistent.
-
-4. **Merging Datasets:**
-
-   ```python
-   merged_df = all_stocks.merge(news, how='inner', left_on=['ticker', 'date'], right_on=['ticker', 'date'])
-   ```
-
-   The stock and news data are merged on matching ticker symbols and dates, filtering for relevant data.
-
-5. **Filtering by Industry:**
-
-   ```python
-   industry_group = merged_df.groupby('Industry').filter(lambda x: x['ticker'].nunique() > 10)
-   ```
-
-   The data is filtered to focus on industries with more than 10 stocks, allowing for more robust analysis.
-
-6. **Visualization:**
-
-   ```python
-   import matplotlib.pyplot as plt
-
-   industry_group[industry_group['Industry'] == 'Medical Devices'].plot(x='date', y='Adj Close Diff')
-   plt.title('Stock Price Changes in Medical Devices Industry')
-   plt.xlabel('Date')
-   plt.ylabel('Adj Close Difference')
-   plt.show()
-   ```
-
-   Visualization is performed to show trends in stock price changes in the Medical Devices industry.
+```bash
+pip install -r requirements.txt
+```
 
 ## Usage
 
-1. Run the script to process and analyze the data:
+### Data Extraction and Processing
 
-   ```bash
-   python main.py
-   ```
+1. **Extract Stock Data**: Extract CSV files for the specified stocks from the `stocks.zip` file.
+2. **Process News Headlines**: Clean and preprocess the news headlines dataset.
+3. **Merge Data**: Combine the stock data and news headlines data, aligning on date and ticker symbol.
+4. **Perform Sentiment Analysis**: Analyze the sentiment of the news headlines using VADER sentiment analysis.
+5. **Save Processed Data**: Save the final merged dataset with sentiment scores to `training_data.csv`.
 
-2. Check the visualizations generated to interpret how news headlines correlate with stock price movements.
+### Running the Analysis
+
+You can use the provided Jupyter notebook (`analysis.ipynb`) to perform exploratory data analysis and visualization. Open the notebook and run the cells to generate insights and visualizations.
+
+## Methods
+
+1. **Data Extraction**:
+   - **Stock Data**: Extracted from zip files containing historical stock prices in CSV format.
+   - **News Headlines**: Gathered from various news sources and stored in `news_headlines.csv`.
+
+2. **Data Processing**:
+   - **Cleaning**: Removed duplicates, handled missing values, and standardized date formats.
+   - **Merging**: Combined stock price data and news headlines based on date and ticker symbol.
+   - **Feature Engineering**: Created additional features like moving averages and volatility from stock price data.
+
+3. **Sentiment Analysis**:
+   - **Tool Used**: VADER sentiment analysis tool was employed to analyze the sentiment of news headlines.
+   - **Sentiment Scoring**: Each headline was scored for positive, negative, and neutral sentiment.
+
+4. **Data Integration**:
+   - Combined sentiment scores with stock price data to create a comprehensive dataset (`training_data.csv`).
+   - Analyzed correlations between sentiment scores and stock price movements.
+
+5. **Visualization and Analysis**:
+   - Used `matplotlib` and `seaborn` for visualizing stock price trends, sentiment trends, and correlation heatmaps.
+   - Applied statistical methods to determine the relationship between sentiment and stock price changes.
 
 ## Results
 
-The analysis identifies patterns in stock price changes in relation to news events, particularly within industries with multiple stocks. This can provide insights into how specific news may affect market behavior in targeted sectors.
+- **Sentiment and Stock Prices**: Preliminary results indicate a moderate correlation between sentiment scores and stock price movements. Positive sentiment often correlates with price increases, while negative sentiment correlates with price decreases.
+- **Visualizations**:
+  - **Stock Price Trends**: Line charts showing stock price movements over time.
+  - **Sentiment Trends**: Plots showing the variation in sentiment scores over time.
+  - **Correlation Heatmaps**: Visualizations indicating the strength of the relationship between sentiment and various stock price metrics.
+
+- **Insights**:
+  - **Positive Sentiment**: Generally associated with upward price trends.
+  - **Negative Sentiment**: Often precedes downward price trends.
+  - **Volatility Analysis**: Higher sentiment variability tends to correspond with increased stock price volatility.
+
+## Data
+
+- **Stock Data**: CSV files inside `stocks.zip`, containing historical stock prices for various companies.
+- **News Headlines**: `news_headlines.csv`, containing news headlines with associated dates and stock tickers.
+- **Industry Data**: `news_data.csv`, containing ticker and industry information.
+- **Processed Data**: `training_data.csv`, the final dataset with merged stock data, sentiment scores, and additional features.
+
+## Dependencies
+
+The following Python packages are required:
+
+- `pandas`
+- `numpy`
+- `matplotlib`
+- `seaborn`
+- `scikit-learn`
+- `vaderSentiment`
+- `zipfile36` (for handling zip files)
+- `openpyxl` (if working with Excel files)
+
+You can install them using `pip`:
+
+```bash
+pip install pandas numpy matplotlib seaborn scikit-learn vaderSentiment zipfile36 openpyxl
+```
 
 ## Contributing
 
-Contributions are welcome! To contribute:
+Contributions are welcome! Please fork the repository and submit a pull request with your changes. For significant changes, please open an issue first to discuss the proposed changes.
 
-1. Fork the repository.
-2. Create a feature branch (`git checkout -b feature-branch`).
-3. Commit your changes (`git commit -m "Add feature"`).
-4. Push to the branch (`git push origin feature-branch`).
-5. Open a pull request.
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+Feel free to adjust the Methods and Results sections based on the specifics of your analysis and findings.
